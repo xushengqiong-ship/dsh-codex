@@ -1,8 +1,6 @@
 # dsh-codex
 
-[![test](https://github.com/OWNER/REPO/actions/workflows/test.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/test.yml)
-
-> 徽章里的 `OWNER/REPO` 换成你的 GitHub 用户名和仓库名。
+[![test](https://github.com/xushengqiong-ship/dsh-codex/actions/workflows/test.yml/badge.svg)](https://github.com/xushengqiong-ship/dsh-codex/actions/workflows/test.yml)
 
 [English](README.md) | 简体中文
 

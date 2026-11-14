@@ -13,6 +13,18 @@
   "peerDependencies": {
     "@deepseek-ai/dsh-tools": "*"
   },
-  "keywords": ["dsh-plugin", "codex", "delegate", "subagent"],
+  "keywords": ["dsh-plugin", "deepseek-harness", "codex", "codex-cli", "delegate", "subagent"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xushengqiong-ship/dsh-codex.git"
+  },
+  "homepage": "https://github.com/xushengqiong-ship/dsh-codex#readme",
+  "bugs": {
+    "url": "https://github.com/xushengqiong-ship/dsh-codex/issues"
+  },
+  "author": "xushengqiong-ship",
+  "engines": {
+    "node": ">=22"
+  },
   "license": "MIT"
 }

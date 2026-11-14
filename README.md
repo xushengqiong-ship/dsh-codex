@@ -1,8 +1,6 @@
 # dsh-codex
 
-[![test](https://github.com/OWNER/REPO/actions/workflows/test.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/test.yml)
-
-> Replace `OWNER/REPO` in the badge with your GitHub user and repository name.
+[![test](https://github.com/xushengqiong-ship/dsh-codex/actions/workflows/test.yml/badge.svg)](https://github.com/xushengqiong-ship/dsh-codex/actions/workflows/test.yml)
 
 English | [简体中文](README.zh-CN.md)
 
