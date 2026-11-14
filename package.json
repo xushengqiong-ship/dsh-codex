@@ -1,0 +1,18 @@
+{
+  "name": "dsh-codex",
+  "version": "0.1.0",
+  "description": "Delegate heavy work from DeepSeek Harness to your local Codex CLI and bring back only the final answer.",
+  "type": "module",
+  "main": "lib/index.mjs",
+  "files": ["lib/", "cordis.patch.yml", "README.md", "README.zh-CN.md", "LICENSE"],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "*"
+  },
+  "keywords": ["dsh-plugin", "codex", "delegate", "subagent"],
+  "license": "MIT"
+}

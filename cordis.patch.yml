@@ -1,0 +1,6 @@
+# dsh-codex bundle patch
+# 装法：本目录 junction 到 ~/.dsh/plugins/dsh-codex，
+# 再把 dsh-codex 加进 profile 的 package.json 依赖与 dsh.profile.bundles。
+- insert:
+    - id: dsh-codex
+      name: dsh-codex

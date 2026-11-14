@@ -1,0 +1,42 @@
+name: test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: [22, 24]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: 语法检查
+        run: |
+          node --check lib/run.mjs
+          node --check lib/index.mjs
+
+      # 只验证「发现逻辑不崩」。CI 机器上没有装 Codex，
+      # 因此这里不要求找到可执行文件，找到就用真实环境验排序。
+      - name: 可执行文件发现（真实环境）
+        run: node smoke/test-resolve.mjs
+
+      # 核心跨平台回归：造假目录结构，验证各安装形态的识别与排序。
+      # 不依赖任何真实 Codex 安装，所以在干净 runner 上也能跑。
+      - name: 隔离发现测试（造假目录）
+        run: node smoke/test-discovery.mjs
+
+      # 桩替换 @deepseek-ai/dsh-tools，验证工具注册、结构、参数校验。
+      - name: 插件冒烟测试
+        run: node --no-warnings --experimental-loader ./smoke/loader.mjs ./smoke/test.mjs
