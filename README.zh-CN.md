@@ -25,26 +25,65 @@
 
 ## 选择模型与推理强度
 
-模型和档位**不是写死的**。取值优先级：
+模型和档位**不是写死的**，来自**你这台机器上**的 Codex（`codex debug models`）。所以 OpenAI 出了新模型，
+只要本机 Codex 认识它就能直接用，**插件不用升级**。
 
-1. `codex_delegate` 调用时传的参数
-2. 环境变量 `DSH_CODEX_MODEL` / `DSH_CODEX_EFFORT`
-3. `~/.dsh/codex-delegate.json`
-4. 内置默认（`gpt-6.1-sol` + `max`）
+### 第一步：看有哪些可选
+
+让助手跑一次 `codex_models`（不花钱），或自己执行：
+
+```powershell
+node smoke/list-models.mjs
+```
+
+它会列出全部模型、每个模型支持的档位、当前默认值，以及这个默认值是从哪儿来的。
+
+> 注意：档位不是每个模型都一样。有的模型有 `ultra`，有的只到 `max`，别照抄别人的配置。
+
+### 第二步：选一种改法
+
+| 你想要 | 怎么做 | 何时生效 |
+| --- | --- | --- |
+| 只这一次换 | 直接跟助手说「这次用 gpt-6-astra、high」 | 立刻 |
+| 以后都默认 | 编辑 `~/.dsh/codex-delegate.json` | **存盘即生效，不用重启** |
+| 整机统一 | 设环境变量 `DSH_CODEX_MODEL` / `DSH_CODEX_EFFORT` | **要重启 DSH** |
+
+配置文件最小写法（只改一项就只写一项）：
+
+```json
+{
+  "model": "gpt-6-astra",
+  "effort": "high"
+}
+```
+
+JSON 写坏了不会崩——插件会忽略坏配置、回退到内置默认。Sandbox 和超时也可以放进去：
 
 ```json
 {
   "model": "gpt-6-astra",
   "effort": "high",
-  "sandbox": "read-only",
-  "timeoutSec": 900
+  "sandbox": "workspace-write",
+  "timeoutSec": 600
 }
 ```
 
-可用模型和档位来自**你这台机器上**的 Codex（`codex debug models`）。所以 OpenAI 出了新模型，
-只要本机 Codex 认识它就能直接用，**插件不用升级**。运行 `codex_models`（或
-`node smoke/list-models.mjs`）查看当前清单；模型不支持的组合会当场被拒，并列出它支持的档位，
-而不是丢给 Codex 深处报一个看不懂的错。
+Windows 设置环境变量（**做完必须重启 DSH**，因为进程启动时才读环境变量）：
+
+```powershell
+[Environment]::SetEnvironmentVariable('DSH_CODEX_MODEL','gpt-6-astra','User')
+[Environment]::SetEnvironmentVariable('DSH_CODEX_EFFORT','high','User')
+```
+
+### 优先级
+
+```
+调用参数  >  环境变量  >  配置文件  >  内置默认（gpt-6.1-sol + max）
+```
+
+即使配置文件设成 `astra`，某次调用显式指定 `luna` 也会盖过它。
+
+模型不支持的组合会当场被拒，并列出它实际支持的档位，而不是丢给 Codex 深处报一个看不懂的错。
 
 ### 什么时候值得委派
 

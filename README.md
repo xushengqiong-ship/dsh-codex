@@ -27,26 +27,70 @@ The trade-off: the main conversation sees no intermediate steps. That is why it 
 
 ## Choosing model and reasoning effort
 
-Model and effort are **not hardcoded**. Resolution order:
+Model and effort are **not hardcoded**. They come from **your** Codex via `codex debug models`, so a
+new model works as soon as your local Codex knows about it — **no plugin upgrade needed**.
 
-1. arguments passed to the `codex_delegate` call
-2. environment variables `DSH_CODEX_MODEL` / `DSH_CODEX_EFFORT`
-3. `~/.dsh/codex-delegate.json`
-4. built-in default (`gpt-6.1-sol` + `max`)
+### Step 1 — see what you can pick
+
+Ask the assistant to run `codex_models` (free), or run it yourself:
+
+```powershell
+node smoke/list-models.mjs
+```
+
+It lists every model, the effort levels each model actually supports, the current default, and where
+that default came from.
+
+> Effort levels are not uniform: some models offer `ultra`, others stop at `max`. Do not copy
+> someone else's config blindly.
+
+### Step 2 — pick one of three ways
+
+| You want | Do this | When it takes effect |
+| --- | --- | --- |
+| Just this once | Tell the assistant «use gpt-6-astra at high for this one» | Immediately |
+| Change the default | Edit `~/.dsh/codex-delegate.json` | **Saving the file is enough — no restart** |
+| Machine-wide | Set env vars `DSH_CODEX_MODEL` / `DSH_CODEX_EFFORT` | **Requires a DSH restart** |
+
+Minimal config file (only write the keys you want to change):
+
+```json
+{
+  "model": "gpt-6-astra",
+  "effort": "high"
+}
+```
+
+A malformed file will not break anything — the plugin ignores it and falls back to the built-in
+default. Sandbox and timeout can live there too:
 
 ```json
 {
   "model": "gpt-6-astra",
   "effort": "high",
-  "sandbox": "read-only",
-  "timeoutSec": 900
+  "sandbox": "workspace-write",
+  "timeoutSec": 600
 }
 ```
 
-The set of valid models and effort levels is read from **your** Codex via `codex debug models`, so a
-new model works as soon as your local Codex knows about it — **no plugin upgrade needed**. Run
-`codex_models` (or `node smoke/list-models.mjs`) to see the current catalog; combinations a model
-does not support are rejected with the list of allowed efforts instead of failing deep inside Codex.
+Setting env vars on Windows (**a DSH restart is required**, because the process only reads them at
+startup):
+
+```powershell
+[Environment]::SetEnvironmentVariable('DSH_CODEX_MODEL','gpt-6-astra','User')
+[Environment]::SetEnvironmentVariable('DSH_CODEX_EFFORT','high','User')
+```
+
+### Precedence
+
+```
+call arguments  >  env vars  >  config file  >  built-in default (gpt-6.1-sol + max)
+```
+
+So even with `astra` in the config file, explicitly asking for `luna` in one call wins.
+
+A combination the model does not support is rejected up front, with the list of effort levels it
+does support — instead of failing deep inside Codex with an opaque error.
 
 ### When delegation pays off
 
