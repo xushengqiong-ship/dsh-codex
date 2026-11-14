@@ -69,9 +69,9 @@ Codex available
 
 | Platform | Status | Notes |
 | --- | --- | --- |
-| Windows | **Tested** | Used daily; see the command-runner caveat below |
-| macOS | Adapted in code, **not tested** | Main differences are binary discovery and process termination |
-| Linux | Same as macOS | Not tested |
+| Windows | **Tested end-to-end** | Used daily, both desktop app and IDE extension binaries |
+| macOS | **CI-verified** | Offline tests pass on `macos-latest`; a real `codex exec` call is still unverified |
+| Linux | **CI-verified** | Offline tests pass on `ubuntu-latest`; a real `codex exec` call is still unverified |
 
 Three places branch on platform:
 

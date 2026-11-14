@@ -65,9 +65,9 @@ Codex 可用
 
 | 平台 | 状态 | 说明 |
 | --- | --- | --- |
-| Windows | **实测通过** | 本机日常使用；有 command-runner 的那个坑（见下） |
-| macOS | 代码层适配，**未实测** | 主要差异是 exe 发现路径和杀进程方式，已分别处理 |
-| Linux | 同 macOS | 未实测 |
+| Windows | **端到端实测** | 日常在用，桌面版和 IDE 扩展两份 CLI 都验过 |
+| macOS | **CI 已验证** | 离线测试在 `macos-latest` 上通过；真实 `codex exec` 调用仍未实测 |
+| Linux | **CI 已验证** | 离线测试在 `ubuntu-latest` 上通过；真实 `codex exec` 调用仍未实测 |
 
 跨平台相关的三处，代码里都做了分支：
 
