@@ -4,7 +4,8 @@
 
 [English](README.md) | 简体中文
 
-把重活外包给本机 **Codex CLI**（默认 `gpt-6.1-sol` + `max` 推理档），只把**最终答复**拿回主上下文。
+把重活外包给本机 **Codex CLI**（模型随你本机 Codex 里有的选，默认 `gpt-6.1-sol` + `max` 推理档），
+只把**最终答复**拿回主上下文。
 
 ## 为什么
 
@@ -19,7 +20,31 @@
 | 工具 | 用途 |
 | --- | --- |
 | `codex_delegate` | 跑一次委派：任务 + 目录 + 沙箱 + 超时，返回最终答复 |
+| `codex_models` | 列出本机 Codex 可用的模型，以及每个模型支持的推理档位；不调用模型、不花钱 |
 | `codex_status` | 查可执行文件、版本和所有候选，不调用模型、不花钱 |
+
+## 选择模型与推理强度
+
+模型和档位**不是写死的**。取值优先级：
+
+1. `codex_delegate` 调用时传的参数
+2. 环境变量 `DSH_CODEX_MODEL` / `DSH_CODEX_EFFORT`
+3. `~/.dsh/codex-delegate.json`
+4. 内置默认（`gpt-6.1-sol` + `max`）
+
+```json
+{
+  "model": "gpt-6-astra",
+  "effort": "high",
+  "sandbox": "read-only",
+  "timeoutSec": 900
+}
+```
+
+可用模型和档位来自**你这台机器上**的 Codex（`codex debug models`）。所以 OpenAI 出了新模型，
+只要本机 Codex 认识它就能直接用，**插件不用升级**。运行 `codex_models`（或
+`node smoke/list-models.mjs`）查看当前清单；模型不支持的组合会当场被拒，并列出它支持的档位，
+而不是丢给 Codex 深处报一个看不懂的错。
 
 ### 什么时候值得委派
 
@@ -132,15 +157,24 @@ node smoke/test-resolve.mjs
 # 2) 隔离发现测试：造假目录，验证「只有 IDE 扩展」「桌面版残缺」等场景的排序
 node smoke/test-discovery.mjs
 
-# 3) 冒烟测试：桩替换 dsh-tools，验证注册/结构/参数校验，不调模型、不花钱
+# 3) 模型目录测试：全用固件数据，证明「插件没见过的新模型」不会被误拦
+node smoke/test-models.mjs
+
+# 4) 配置优先级测试：临时 HOME，验证 env > 配置文件 > 内置默认
+node smoke/test-config.mjs
+
+# 5) 冒烟测试：桩替换 dsh-tools，验证注册/结构/参数校验，不调模型、不花钱
 cd smoke
 node --no-warnings --experimental-loader ./loader.mjs ./test.mjs
 
-# 4) 真跑一次（花额度，冷启动约 2 分钟）
+# 6) 真跑一次（花额度，冷启动约 2 分钟）
 cd ..
-node test-run.mjs "只回答三个字：跑通了"          # 只读
-node test-run.mjs "在当前目录建 a.txt" --write   # 允许写
+node test-run.mjs "只回答三个字：跑通了"                # 只读
+node test-run.mjs "在当前目录建 a.txt" --write          # 允许写
+node test-run.mjs "只回答四个字：换模型成功" --model=gpt-6-astra --effort=high  # 指定模型/档位
 ```
+
+> 查看本机可用模型：`node smoke/list-models.mjs`（不花钱）。
 
 > `--experimental-loader` 必须传**相对路径**。Node 在 Windows 上会拒绝绝对路径，
 > 报 `ERR_UNSUPPORTED_ESM_URL_SCHEME`。
@@ -148,7 +182,7 @@ node test-run.mjs "在当前目录建 a.txt" --write   # 允许写
 ## 持续集成
 
 `.github/workflows/test.yml` 在 `ubuntu-latest` / `macos-latest` / `windows-latest` 上
-用 Node 22 和 24 跑上面三个离线测试。
+用 Node 22 和 24 跑上面五个离线测试。
 
 CI 能证明发现逻辑、模块加载、参数校验在三平台上都正常；**不能**证明 `codex exec` 真能连上模型
 ——runner 上没有 Codex 登录态，也不该把额度烧在 CI 里。最后这一步只能在有账号的机器上验一次。

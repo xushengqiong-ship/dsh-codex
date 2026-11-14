@@ -37,6 +37,14 @@ jobs:
       - name: 隔离发现测试（造假目录）
         run: node smoke/test-discovery.mjs
 
+      # 模型目录解析与校验：全部用固件数据，验证「用户自选模型/档位」不会误拦新模型。
+      - name: 模型目录测试
+        run: node smoke/test-models.mjs
+
+      # 配置优先级：临时 HOME，验证 env > 配置文件 > 默认。
+      - name: 配置优先级测试
+        run: node smoke/test-config.mjs
+
       # 桩替换 @deepseek-ai/dsh-tools，验证工具注册、结构、参数校验。
       - name: 插件冒烟测试
         run: node --no-warnings --experimental-loader ./smoke/loader.mjs ./smoke/test.mjs

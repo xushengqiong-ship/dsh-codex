@@ -4,8 +4,9 @@
 
 English | [简体中文](README.zh-CN.md)
 
-Delegate heavy work to your local **Codex CLI** (defaults to `gpt-6.1-sol` with `max` reasoning
-effort) and bring back only the **final answer** into the main context.
+Delegate heavy work to your local **Codex CLI** (any model your Codex offers — defaults to
+`gpt-6.1-sol` with `max` reasoning effort) and bring back only the **final answer** into the main
+context.
 
 ## Why
 
@@ -21,7 +22,31 @@ The trade-off: the main conversation sees no intermediate steps. That is why it 
 | Tool | Purpose |
 | --- | --- |
 | `codex_delegate` | Run one delegation: task + cwd + sandbox + timeout, returns the final answer |
+| `codex_models` | List the models the local Codex offers and the effort levels each supports; no model call, free |
 | `codex_status` | Show the resolved executable, its version and every candidate; no model call, free |
+
+## Choosing model and reasoning effort
+
+Model and effort are **not hardcoded**. Resolution order:
+
+1. arguments passed to the `codex_delegate` call
+2. environment variables `DSH_CODEX_MODEL` / `DSH_CODEX_EFFORT`
+3. `~/.dsh/codex-delegate.json`
+4. built-in default (`gpt-6.1-sol` + `max`)
+
+```json
+{
+  "model": "gpt-6-astra",
+  "effort": "high",
+  "sandbox": "read-only",
+  "timeoutSec": 900
+}
+```
+
+The set of valid models and effort levels is read from **your** Codex via `codex debug models`, so a
+new model works as soon as your local Codex knows about it — **no plugin upgrade needed**. Run
+`codex_models` (or `node smoke/list-models.mjs`) to see the current catalog; combinations a model
+does not support are rejected with the list of allowed efforts instead of failing deep inside Codex.
 
 ### When delegation pays off
 
@@ -142,11 +167,17 @@ node smoke/test-resolve.mjs
 # 2) Isolated discovery: fake directory layouts for "extension only", "broken desktop install", ...
 node smoke/test-discovery.mjs
 
-# 3) Smoke test: stub out dsh-tools, verify registration, structure and argument validation; no model call
+# 3) Model catalog: fixtures only; proves a model the plugin has never heard of is not blocked
+node smoke/test-models.mjs
+
+# 4) Config precedence: temp HOME; verifies env > config file > built-in default
+node smoke/test-config.mjs
+
+# 5) Smoke test: stub out dsh-tools, verify registration, structure and argument validation; no model call
 cd smoke
 node --no-warnings --experimental-loader ./loader.mjs ./test.mjs
 
-# 4) A real run (spends quota; ~2 min cold start)
+# 6) A real run (spends quota; ~2 min cold start)
 cd ..
 node test-run.mjs "Reply with exactly: OK"                        # read-only
 node test-run.mjs "Create a.txt in the current directory" --write  # allow writes
@@ -157,7 +188,7 @@ node test-run.mjs "Create a.txt in the current directory" --write  # allow write
 
 ## Continuous integration
 
-`.github/workflows/test.yml` runs the three offline tests above on
+`.github/workflows/test.yml` runs the five offline tests above on
 `ubuntu-latest` / `macos-latest` / `windows-latest` with Node 22 and 24.
 
 CI proves the discovery logic, module loading and argument validation work on all three platforms.
